@@ -1,35 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { generateClient } from "aws-amplify/api";
+import { Schema } from "../amplify/data/resource";
+import { createAIHooks } from "@aws-amplify/ui-react-ai";
+import { AIConversation } from "@aws-amplify/ui-react-ai";
+import { Heading, View } from "@aws-amplify/ui-react";
+import { signOut } from "aws-amplify/auth";
 
-function App() {
-  const [count, setCount] = useState(0)
+const client = generateClient<Schema>();
+
+export default function App() {
+  const { useAIConversation } = createAIHooks(client);
+
+  const [
+    {
+      data: { messages },
+      isLoading,
+    },
+    handleSendMessage,
+  ] = useAIConversation("chat");
+
+  async function handleSignOut() {
+    await signOut();
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <main>
+      <button onClick={handleSignOut}>Sign out</button>
+      <View flex={1} height="80vh">
+        <Heading level={3}>Amplify AI For Amazon Web Services</Heading>
+        <AIConversation
+          messages={messages}
+          isLoading={isLoading}
+          handleSendMessage={handleSendMessage}
+        />
+      </View>
+    </main>
+  );
 }
-
-export default App
